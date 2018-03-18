@@ -1,0 +1,110 @@
+diagram = (function(){
+    var $ = go.GraphObject.make;
+    var diagram;
+    var palette;
+
+    var initDiagram = function(){
+        diagram = $(go.Diagram, 'diagram-content', {
+            initialContentAlignment: go.Spot.Center,
+            allowDrop: true,
+            layout: $(go.LayeredDigraphLayout)
+        });
+        
+        getTemplates().forEach(x => diagram.nodeTemplateMap.add(x.category, x.template));
+
+        diagram.model = $(go.GraphLinksModel, {
+            linkFromPortIdProperty: 'fromPort',
+            linkToPortIdProperty: 'toPort',
+            nodeDataArray: [
+                {key: 1, category: 'first'},
+                {key: 2, category: 'second'},
+                {key: 3, category: 'second'},
+                {key: 4, category: 'third'}
+            ],
+            linkDataArray: [
+                {from: 1, to: 2, toPort: 'entry'},
+                {from: 2, to: 3, fromPort: 'exit', toPort: 'entry'},
+                {from: 1, to: 3, toPort: 'entry'},
+                {from: 3, to: 4, fromPort: 'exit'}
+            ]
+        });
+
+        diagram.grid.visible = true;
+        diagram.toolManager.draggingTool.isGridSnapEnabled = true;
+        diagram.toolManager.draggingTool.gridSnapCellSize = new go.Size(50,50);
+    }
+
+    var initPalette = function(){
+        palette = $(go.Palette, 'palette-content');
+        getTemplates().forEach(x => palette.nodeTemplateMap.add(x.category, x.template));
+
+        palette.model.nodeDataArray = [
+            {key: 1, category: 'first'},
+            {key: 2, category: 'second'},
+            {key: 3, category: 'third'}
+        ]
+    }
+
+    var getTemplates = function(){
+        return [{
+            category: 'first',
+            template: $(go.Node, 'Auto', $(go.Shape, 'Circle', {
+                width: 100,
+                height: 100,
+                fill: 'white'
+            }), $(go.Shape, 'Rectangle', {
+                portId: '',
+                width: 20,
+                height: 20,
+                fill: 'black',
+                fromLinkable: true,
+                toLinkable: true
+            }))
+        },
+        {
+            category: 'second',
+            template: $(go.Node, 'Spot', $(go.Shape, {
+                geometryString: 'F M0 0 L100 0 Q150 50 100 100 L0 100 Q50 50 0 0z',
+                fill: 'white',
+                width: 100,
+                height: 100
+            }), $(go.Shape, 'Rectangle', {
+                portId: 'entry',
+                width: 20,
+                height: 20,
+                fill: 'black',
+                alignment: go.Spot.Left,
+                fromLinkable: false,
+                toLinkable: true
+            }), $(go.Shape, 'Rectangle', {
+                portId: 'exit',
+                width: 20,
+                height: 20,
+                fill: 'black',
+                alignment: go.Spot.Right,
+                fromLinkable: true,
+                toLinkable: false
+            }))
+        },
+        {
+            category: 'third',
+            template: $(go.Node, 'Vertical', $(go.Shape, 'Rectangle', {
+                width: 50,
+                height: 50,
+                strokeWidth: 0,
+                fill: 'blue'
+            }), $(go.Shape, 'Rectangle', {
+                portId: '',
+                width: 100,
+                height: 50,
+                strokeWidth: 5,
+                stroke: 'green',
+                fill: 'purple',
+                fromLinkable: true,
+                toLinkable: true
+            }))        
+        }]
+    }
+
+    return { initDiagram, initPalette };
+})();
